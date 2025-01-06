@@ -21,6 +21,13 @@ h1 {
     text-align: center;
 }
 
+.month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
 #calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -81,4 +88,23 @@ h1 {
 .close-button {
     float: right;
     cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .dialog-content {
+        width: 90%;
+    }
+
+    .month-navigation button {
+        font-size: 12px;
+    }
+
+    .day {
+        padding: 10px;
+        font-size: 14px;
+    }
 }
