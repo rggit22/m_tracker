@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    let deferredPrompt;
     const calendar = document.getElementById('calendar');
     const totalConsumption = document.getElementById('total-consumption');
     const totalAmount = document.getElementById('total-amount');
@@ -35,11 +36,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const dayElement = document.createElement('div');
             dayElement.classList.add('day');
             dayElement.textContent = i;
-            dayElement.addEventListener('click', () => openDialog(i));
+            const date = new Date(year, month, i);
+            const today = new Date();
+
+            if (date.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+
+            if (date > today) {
+                dayElement.classList.add('future');
+                dayElement.style.pointerEvents = 'none';
+                dayElement.style.backgroundColor = '#f0f0f0';
+            } else {
+                dayElement.addEventListener('click', () => openDialog(i));
+            }
+
             const storedQuantity = getQuantity(year, month, i);
             if (storedQuantity > 0) {
                 dayElement.classList.add('active');
-                dayElement.textContent += ` (${storedQuantity}L)`;
+                dayElement.textContent += ` (${storedQuantity.toFixed(1)}L)`;
             }
             calendar.appendChild(dayElement);
         }
@@ -51,8 +66,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function openDialog(day) {
         selectedDate = new Date(currentYear, currentMonth, day);
         dialogDate.textContent = selectedDate.toDateString();
-        quantityInput.value = getQuantity(currentYear, currentMonth, day);
+        quantityInput.value = getQuantity(currentYear, currentMonth, day).toFixed(1);
         dialog.style.display = 'flex';
+        quantityInput.focus();
+        quantityInput.select();
     }
 
     function closeDialog() {
@@ -60,7 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function saveQuantity() {
-        const quantity = parseFloat(quantityInput.value) || 0;
+        let quantity = parseFloat(quantityInput.value) || 0;
+        quantity = Math.max(0, Math.min(100, quantity));
         setQuantity(currentYear, currentMonth, selectedDate.getDate(), quantity);
         closeDialog();
         renderCalendar(currentMonth, currentYear);
@@ -84,19 +102,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 total += parseFloat(day.textContent.split('(')[1]) || 0;
             }
         });
-        totalConsumption.textContent = `Total Milk Consumed: ${total} liters`;
+        totalConsumption.textContent = `Total Milk Consumed: ${total.toFixed(1)} liters`;
     }
 
     function updateTotalAmount() {
-        const pricePerLiter = parseFloat(priceInput.value) || 0;
+        const pricePerLiter = Math.round(parseFloat(priceInput.value)) || 0;
+        priceInput.value = pricePerLiter; // Round off price input
         let total = 0;
         const days = Array.from(calendar.children);
         days.forEach(day => {
             if (!day.classList.contains('empty') && day.classList.contains('active')) {
-                total += parseFloat(day.textContent.split('(')[1]) * pricePerLiter || 0;
+                total += (parseFloat(day.textContent.split('(')[1]) || 0) * pricePerLiter;
             }
         });
-        totalAmount.textContent = `Total Amount: ₹${total.toFixed(2)}`;
+        totalAmount.textContent = `Total Amount: ₹${total.toFixed(0)}`;
     }
 
     priceInput.addEventListener('input', updateTotalAmount);
@@ -126,12 +145,27 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCalendar(currentMonth, currentYear);
     });
 
-    pwaCta.addEventListener('click', () => {
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            alert('App is already installed as PWA.');
-        } else {
-            alert('Use the "Add to Home Screen" option in your browser to install this app as PWA.');
-        }
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI to notify the user they can install the PWA
+        pwaCta.style.display = 'block';
+
+        pwaCta.addEventListener('click', () => {
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the PWA prompt');
+                } else {
+                    console.log('User dismissed the PWA prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
     });
 
     renderCalendar(currentMonth, currentYear);
