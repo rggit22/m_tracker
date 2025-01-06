@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const saveButton = document.getElementById('save-button');
     const closeButton = document.querySelector('.close-button');
     const pwaCta = document.getElementById('pwa-cta');
+    const prevMonthBtn = document.getElementById('prev-month');
+    const nextMonthBtn = document.getElementById('next-month');
+    const monthYearDisplay = document.getElementById('month-year');
     
     let currentDate = new Date();
     let currentMonth = currentDate.getMonth();
@@ -21,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const monthEnd = new Date(year, month + 1, 0);
         const daysInMonth = monthEnd.getDate();
         const startDay = monthStart.getDay();
+
+        monthYearDisplay.textContent = `${monthStart.toLocaleString('default', { month: 'long' })} ${year}`;
 
         for (let i = 0; i < startDay; i++) {
             calendar.innerHTML += '<div class="day empty"></div>';
@@ -91,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 total += parseFloat(day.textContent.split('(')[1]) * pricePerLiter || 0;
             }
         });
-        totalAmount.textContent = `Total Amount: $${total.toFixed(2)}`;
+        totalAmount.textContent = `Total Amount: ₹${total.toFixed(2)}`;
     }
 
     priceInput.addEventListener('input', updateTotalAmount);
@@ -100,6 +105,32 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('click', (e) => {
         if (e.target === dialog) {
             closeDialog();
+        }
+    });
+
+    prevMonthBtn.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    pwaCta.addEventListener('click', () => {
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            alert('App is already installed as PWA.');
+        } else {
+            alert('Use the "Add to Home Screen" option in your browser to install this app as PWA.');
         }
     });
 
