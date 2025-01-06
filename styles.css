@@ -46,6 +46,10 @@ h1 {
     background-color: lightgreen;
 }
 
+.day.today {
+    border: 2px solid red;
+}
+
 #total-consumption,
 #total-amount {
     margin-top: 20px;
