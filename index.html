@@ -9,12 +9,17 @@
 <body>
     <div class="container">
         <h1>Milk Tracker</h1>
+        <div class="month-navigation">
+            <button id="prev-month">&lt; Previous Month</button>
+            <span id="month-year"></span>
+            <button id="next-month">Next Month &gt;</button>
+        </div>
         <div id="calendar"></div>
         <div id="total-consumption"></div>
         <div id="total-amount"></div>
         <div id="price-input">
-            <label for="price">Price per liter:</label>
-            <input type="number" id="price" min="0" placeholder="Enter price per liter">
+            <label for="price">Price per liter (INR):</label>
+            <input type="number" id="price" min="0" value="70">
         </div>
         <div id="pwa-cta">Install this app as PWA for a better experience!</div>
     </div>
